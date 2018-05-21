@@ -40,14 +40,14 @@ def load_config():
     test_job_str = config['DEFAULT']['TEST_JOB']
 
     if alt_date_str in ['yes', 'Yes', 'YES', 'True', 'true', 'TRUE']:
-        alt_date = TRUE
+        alt_date = True
     else:
-        alt_date = FALSE
+        alt_date = False
 
     if test_job_str in ['yes', 'Yes', 'YES', 'True', 'true', 'TRUE']:
-        test_job = TRUE
+        test_job = True
     else:
-        test_job = FALSE
+        test_job = False
 
     if file_path is "":
         messagebox.showinfo("Warning", "Please enter a CSV file path into the config file and relaunch the program.")
