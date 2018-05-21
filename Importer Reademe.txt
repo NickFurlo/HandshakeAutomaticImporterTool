@@ -1,0 +1,39 @@
+Handshake Importer
+	This application automates the process for uploading and downloading CSV's from the importer. It allows for upload of inital CSV from CS Secure, upload of the fixed CSV, as well as downloading failed rows. 
+
+Getting Started
+	Edit the config file to include the address of the CSV. Then double click the Exe file to run the automatic importer.
+
+Config File
+	The config file will be created upon first run. The following fields will be available. Only the CSV_FILEPATH is needed for the importer to start. 
+
+	USERNAME: Username to be entered into login field. 
+
+	CSV_FILE_PATH: Make sure to / instead of \ in the file path. If the CSV is on network storage it must be mounted with a drive letter. 
+
+	NEW_JOB_DESCRIPTION: Description to be entered when uploading daily CSV
+
+	FAILED_ROWS_DESCRIPTION: Description to be entered when uploading fixed failed rows CSV.
+
+	USE_ALT_DATE_FORMAT: Checks "Use mm/dd/yyyy date format" checkbox during handshake import.
+
+	TEST_JOB: Checks "Test Job?" checkbox during handshake import.
+
+Prerequisites
+	Google Chrome
+
+Menu Options
+	Upload New CSV: Opens Importer and selects script to upload from filepath specified in config file. Inputs descriptions from config file. 
+
+	Download Failed Rows: Downloads failed row CSV from a given job number. If the application is left open after uploading daily CSV, Download Failed Rows will automatically have the job number stored. 
+
+	Upload Fixed Failed Rows: Opens importer and dialog box to pick a file. This file will be uploaded with the "This job changes identifier data" checkbox checked. Inputs descriptions from config file. 
+
+Versioning
+	Version 1.0
+
+Authors
+	Nick Furlo
+
+License
+	The GNU General Public License v3.0
