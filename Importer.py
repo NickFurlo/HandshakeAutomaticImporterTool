@@ -13,6 +13,7 @@ from tkinter.filedialog import askopenfilename
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 
+
 # Creates config files if there is none. Loads values from config files into variables.
 def load_config():
     # If there is no config file, make one.
@@ -161,12 +162,14 @@ def upload_csv(set_identifier, root):
 
     main_menu()
 
+
 # Finds and returns job number on web page
 def find_job_number():
     if "Users import for Oakland University" in driver.page_source:
         return int(driver.find_element_by_xpath("/html/body/div[1]/div/div/h2").text[1:6])
     else:
         return 0
+
 
 # Query uer for job number Navigate to job page and download failed rows.
 def download_failed_rows(root):
