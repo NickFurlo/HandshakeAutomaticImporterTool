@@ -74,6 +74,8 @@ def main_menu():
     root = tkinter.Tk()
     root.title("Auto Importer")
     root.minsize(475, 100)
+    root.iconbitmap('updown.ico')
+
 
     Label(master=root, text="Welcome to the Handshake Automatic Importer").grid(row=0, column=2)
     Label(master=root, text=" ").grid(row=1, column=2)
@@ -114,6 +116,8 @@ def upload_csv(set_identifier, root):
     # New gui
     root2 = tkinter.Tk()
     root2.title("Upload CSV")
+    root2.iconbitmap('updown.ico')
+
     root2.withdraw()
 
     # Open CSV Upload
@@ -202,6 +206,7 @@ def download_failed_rows(root):
     # Close main menu, open new gui.
     root.destroy()
     root2 = tkinter.Tk()
+    root2.iconbitmap('updown.ico')
     global job_number_set
 
     # Try and grab job number from web page
