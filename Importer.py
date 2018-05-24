@@ -180,7 +180,7 @@ def download_failed_rows(root):
     # Open job page and download failed rows CSV
     def pull_file():
         global job_number
-        if job_number is None or int(job_number) < 63731 or int(job_number) > 99999:
+        if not job_number_set or int(job_number) < 63731 or int(job_number) > 99999:
             print("job_number: " + str(job_number))
             set_job_number()
         root2.destroy()
@@ -191,13 +191,13 @@ def download_failed_rows(root):
         driver.get("https://importer.joinhandshake.com/jobs/" + str(job_number) + "/download_failed_file")
 
     # Set's the job_number with text input from the user. Only executed after "Submit" is clicked.
-    def set_job_number():
+    def set_job_number(new_number):
         global job_number
         job_number = float(job_number)
-        if float(e1.get()) < 63731 or float(e1.get()) > 99999:
+        if float(new_number) < 63731 or float(new_number) > 99999:
             messagebox.showerror("Error", "Pleas enter a valid job number.", icon='error')
             return
-        job_number = int(e1.get())
+        job_number = int(new_number)
         global job_number_set
         job_number_set = True
         pull_file()
@@ -219,7 +219,7 @@ def download_failed_rows(root):
         Label(root2, text="Job Number").grid(row=0)
 
         e1 = Entry(root2)
-        button1 = tkinter.Button(master=root2, text='submit', command=lambda: set_job_number(), height=2,
+        button1 = tkinter.Button(master=root2, text='submit', command=lambda: set_job_number(e1.get()), height=2,
                                  width=5)
         e1.grid(row=0, column=1)
         button1.grid(row=0, column=2)
