@@ -20,7 +20,8 @@ Config File
 	TEST_JOB: Checks "Test Job?" checkbox during handshake import.
 
 Prerequisites
-	Google Chrome
+	For Portable: Google Chrome
+	For Python: Google Chrome, Python 3.6.5, Selenium (Python -m pip install selenium)
 
 Menu Options
 	Upload New CSV: Opens Importer and selects script to upload from filepath specified in config file. Inputs descriptions from config file. 
