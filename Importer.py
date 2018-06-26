@@ -11,10 +11,17 @@ from tkinter import messagebox
 from tkinter.filedialog import askopenfilename
 
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support import expected_conditions as EC
+
 
 
 # Creates config files if there is none. Loads values from config files into variables.
+from selenium.webdriver.support.wait import WebDriverWait
+
+
 def load_config():
     # If there is no config file, make one.
     config = configparser.ConfigParser()
@@ -22,7 +29,7 @@ def load_config():
     if not my_file.is_file():
         file = open("Importer.config", "w+")
         file.write(
-            "[DEFAULT]\nUSERNAME = \nCSV_FILE_PATH = \nNEW_JOB_DESCRIPTION = ""New upload from Database. Job created "
+            "[DEFAULT]\nUSERNAME = \nPASSWORD = \nCSV_FILE_PATH = \nNEW_JOB_DESCRIPTION = ""New upload from Database. Job created "
             "by automatic importer python script"" \nFAILED_ROWS_DESCRIPTION = ""Upload of fixed rows. Job created by "
             "automatic importer python script.\n""USE_ALT_DATE_FORMAT = \nTEST_JOB = ")
         messagebox.showinfo("Warning", "Config file created. Please add a CSV file path and relaunch the program.")
@@ -31,9 +38,10 @@ def load_config():
 
     # Read config and set variables
     config.read('Importer.config')
-    global file_path, failed_description, new_description, alt_date, test_job, username
+    global file_path, failed_description, new_description, alt_date, test_job, username, password
 
     username = config['DEFAULT']['USERNAME']
+    password = config['DEFAULT']['PASSWORD']
     file_path = config['DEFAULT']['CSV_FILE_PATH']
     new_description = config['DEFAULT']['NEW_JOB_DESCRIPTION']
     failed_description = config['DEFAULT']['FAILED_ROWS_DESCRIPTION']
@@ -71,7 +79,13 @@ def check_csv():
 
 # Startup main menu GUI
 def main_menu():
-    root = tkinter.Tk()
+   #Alternative Setup
+   root = tkinter.Tk()
+   upload_csv(False,root)
+
+
+   #Gui setup
+"""root = tkinter.Tk()
     root.title("Auto Importer")
     root.minsize(475, 100)
     root.iconbitmap('updown.ico')
@@ -91,13 +105,16 @@ def main_menu():
     button2.grid(row=3, column=2)
     button3.grid(row=3, column=3)
 
-    root.mainloop()
+    root.mainloop()"""
 
 
 # Waits for user to fill in login form
 def login():
     if len(username) > 0:
+        wait_for_page('id',"user_email")
+        wait_for_page('id', "user_password")
         driver.find_element_by_id('user_email').send_keys(username)
+        driver.find_element_by_id('user_password').send_keys(password+Keys.ENTER)
     while "Log in" in driver.page_source:
         time.sleep(1)
     if "Signed in successfully." in driver.page_source:
@@ -114,19 +131,20 @@ def upload_csv(set_identifier, root):
     login()
 
     # New gui
-    root2 = tkinter.Tk()
+    """"root2 = tkinter.Tk()
     root2.title("Upload CSV")
     root2.iconbitmap('updown.ico')
 
-    root2.withdraw()
+    root2.withdraw()"""
 
     # Open CSV Upload
+    wait_for_page('partial_link_text',"Upload New CSV" )
     driver.find_element_by_partial_link_text("Upload New CSV").click()
 
     # gets file path from user if uploading failed rows. Otherwise grabs CSV from handshake.
     if set_identifier:
         file_path = askopenfilename()
-        root2.update()
+        #root2.update()
 
     # check for correct page
     assert "Upload new CSV" in driver.page_source
@@ -136,6 +154,7 @@ def upload_csv(set_identifier, root):
         return
 
     # Upload file to page and fill out form.
+    wait_for_page('name','job[file]')
     file_button = driver.find_element_by_name("job[file]")
     file_button.send_keys(file_path)
 
@@ -160,12 +179,127 @@ def upload_csv(set_identifier, root):
     if test_job:
         driver.find_element_by_xpath('//*[@id="new_job"]/div[4]/div/label/div[2]').click()
 
-    root2.update()
+    #root2.update()
     # Click "Save Job"
     driver.find_element_by_name("button").click()
 
-    main_menu()
+    #main_menu()
 
+# Runs driver.find_element_by_TYPE(name) surrounded by error handling.
+# driver is driver to be used, type is the type of element, name is the
+# element location data, message is error to be printed to console,
+# increase error is boolean that decides to increment error counter
+def find_element(driver, type, name, message, increase_error, recurse, click):
+    time.sleep(1)
+    if type.lower() == 'tag_name':
+        try:
+            wait_for_page('tag_name', name)
+            if click:
+                return driver.find_element_by_tag_name(name).click()
+            return driver.find_element_by_tag_name(name)
+        except:
+            print(message)
+            if recurse:
+                find_element(driver, type, name, message, increase_error, recurse, click)
+            if increase_error:
+                error_count += 1
+            return '-1'
+    elif type.lower() == 'name':
+        try:
+            wait_for_page('name', name)
+            if click:
+                return driver.find_element_by_name(name).click()
+            return driver.find_element_by_name(name)
+        except:
+            print(message)
+            if recurse:
+                find_element(driver, type, name, message, increase_error, recurse, click)
+            if increase_error:
+                error_count += 1
+            return '-1'
+
+    elif type.lower() == 'xpath':
+        try:
+            print('looking for xpath')
+            wait_for_page('xpath', name)
+            if click:
+                return driver.find_element_by_xpath(name).click()
+            return driver.find_element_by_xpath(name)
+
+        except:
+            print(message)
+            if recurse:
+                find_element(driver, type, name, message, increase_error, recurse, click)
+            if increase_error:
+                error_count += 1
+            return '-1'
+    elif type.lower() == 'id':
+        try:
+            wait_for_page('id', name)
+            if click:
+                return driver.find_element_by_id(name).click()
+            return driver.find_element_by_id(name)
+
+        except:
+            print(message)
+            if recurse:
+                find_element(driver, type, name, message, increase_error, recurse, click)
+            if increase_error:
+                error_count += 1
+            return '-1'
+    elif type.lower() == 'class_name':
+        try:
+            wait_for_page('id', name)
+            if click:
+                return driver.find_element_by_class_name(name).click()
+            return driver.find_element_by_class_name(name)
+
+        except:
+            print(message)
+            if recurse:
+                find_element(driver, type, name, message, increase_error, recurse, click)
+            if increase_error:
+                error_count += 1
+            return '-1'
+    else:
+        return '-1'
+
+def wait_for_page(type, name):
+    if type == 'name':
+        #print("Presence of element: " + str(driver.find_element_by_name(name).is_displayed()))
+        # WebDriverWait().until(driver, driver.find_element_by_name(name).is_displayed())
+
+        WebDriverWait(driver, 300).until(EC.visibility_of_element_located((By.NAME, name)))
+
+
+        return # print('wait_for_page success')
+
+    elif type == 'xpath':
+        #print("Presence of element: " + str(driver.find_element_by_xpath(name).is_displayed()))
+        # WebDriverWait().until(driver, driver.find_element_by_xpath(name).is_displayed())
+        WebDriverWait(driver, 300).until(EC.visibility_of_element_located((By.XPATH, name)))
+        return # print('wait_for_page success')
+
+    elif type == 'tag_name':
+        #print("Presence of element: " + str(driver.find_element_by_tag_name(name).is_displayed()))
+        # WebDriverWait().until(driver, driver.find_element_by_tag_name(name).is_displayed())
+        WebDriverWait(driver, 300).until(EC.visibility_of_element_located((By.TAG_NAME, name)))
+        return # print('wait_for_page success')
+
+    elif type == 'id':
+        #print("Presence of element: " + str(driver.find_element_by_id(name).is_displayed()))
+        # WebDriverWait().until(driver, driver.find_element_by_id(name).is_displayed())
+        WebDriverWait(driver, 300).until(EC.presence_of_element_located((By.ID, name)))
+        return # print('wait_for_page success')
+    elif type == 'class_name':
+        #print("Presence of element: " + str(driver.find_element_by_class_name(name).is_displayed()))
+        # WebDriverWait().until(driver, driver.find_element_by_id(name).is_displayed())
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.class_name, name)))
+        return # print('wait_for_page success')
+    elif type == 'partial_link_text':
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.PARTIAL_LINK_TEXT, name)))
+    else:
+        return -'1'
 
 # Finds and returns job number on web page
 def find_job_number():
@@ -236,10 +370,13 @@ driver = webdriver.Chrome()
 job_number_set = False
 job_number = 0
 username = ""
+password = ""
 file_path = ""
 new_description = ""
 failed_description = ""
 alt_date = False
 test_job = False
+global error_count
+error_count =0
 load_config()
 main_menu()
