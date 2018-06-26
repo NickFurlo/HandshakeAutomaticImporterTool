@@ -218,6 +218,7 @@ def find_element(driver, type, name, message, increase_error, recurse, click):
                 error_count += 1
             return '-1'
 
+
     elif type.lower() == 'xpath':
         try:
             print('looking for xpath')
